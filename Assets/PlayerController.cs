@@ -4,29 +4,105 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    Rigidbody2D rigid2D;        // リジッドボディ２Ⅾコンポーネント保存用
-    public float speed;         // 左右の移動速度
-    public float jumpPower;     // ジャンプの強さ
-    Vector3 dir = Vector3.zero; // 左右の移動方向
-    // public AudioSource jumpSe;
+    public LayerMask lMask;     // レイヤーマスク
+    Rigidbody2D rb2d;           // リジッドボディ２Ⅾコンポーネント保存用
+    BoxCollider2D col;          // ボックスコライダー
+
+    float inputLR;              // 左右入力
+
+    bool inputJump;             // ジャンプ入力
+    bool isGround;              // 地面にいるかのフラグ
+
+
+    [SerializeField] float moveSpdX = 100;  // 移動速度x
+    [SerializeField] float jumpPower = 300; // ジャンプ力
 
     void Start()
     {
-        rigid2D = GetComponent<Rigidbody2D>();
+        rb2d = GetComponent<Rigidbody2D>();
+        col  = GetComponent<BoxCollider2D>();
     }
 
-    void Update()
+    // 物理挙動（Rigidbody）の変更はFixedUpdateで
+    void FixedUpdate()
     {
         // 左右移動
-        dir.x = Input.GetAxisRaw("Horizontal");
-        transform.position += dir.normalized * speed * Time.deltaTime;
-        rigid2D.velocity = new Vector2(0, rigid2D.velocity.y);
+        {
+            // 左右入力に合わせて速度ベクトルをセット
+            Vector2 vel = rb2d.velocity;
+            vel.x = inputLR * moveSpdX * Time.deltaTime;
+            rb2d.velocity = vel;
+        }
 
         // ジャンプ
-        if (Input.GetButtonDown("Jump"))
+        if (inputJump == true)
         {
-            // jumpSe.Play();
-            rigid2D.AddForce(Vector2.up * jumpPower);
+            Vector2 vel = rb2d.velocity;
+            vel.y = 0;              // まずYの速度を初期化
+            rb2d.velocity = vel;    // Yの速度反映
+            // ジャンプ力を加える
+            rb2d.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            inputJump = false;       // ジャンプフラグをオフに
         }
     }
+
+    // キー入力、アニメーション、コライダー判定はUpdateメソッドで
+    void Update()
+    {
+        // 地面チェック
+        CheckGround();
+
+        // 左右移動
+        inputLR = Input.GetAxisRaw("Horizontal");
+
+        // 地上にいる場合
+        if (isGround == true)
+        {
+            if (Input.GetButtonDown("Jump"))
+            { // スペースキー
+                inputJump = true;               // ジャンプ入力オン
+            }
+        }
+    }
+
+    // 中心座標を取得
+    Vector3 GetCenterPos()
+    {
+        Vector3 pos = transform.position;
+        pos.y += col.offset.y;
+        return pos;
+    }
+
+    // 足元の座標を取得
+    Vector3 GetFootPos()
+    {
+        Vector3 pos = GetCenterPos();
+        pos.y += -(col.size.y / 2);
+        return pos;
+    }
+
+    // 地面に接触しているかチェック
+    void CheckGround()
+    {
+        isGround = false;                           // 空中判定に
+        Vector3 foot = GetFootPos();
+        float width = col.size.x / 2;               // 幅を取得
+        foot.x -= width;                            // 左端からチェック       
+        for (int no = 0; no < 3; ++no)
+        {            // ３点チェック                    
+            Vector3 end = foot + Vector3.down;      // レイの長さ    
+            // ラインキャストを用いた地面チェック
+            RaycastHit2D result;
+            result = Physics2D.Linecast(foot, end, lMask);
+            Debug.DrawLine(foot, end, Color.red);   // デバッグ表示
+            if (result.collider != null)
+            {           // 何かに接触した
+                isGround = true;
+                Debug.Log("地面に接触");
+                return;
+            }
+            foot.x += width;                        // ｘ座標をずらす
+        }
+    }
+
 }
