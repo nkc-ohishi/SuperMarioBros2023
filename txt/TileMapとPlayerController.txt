@@ -1,0 +1,106 @@
+２Ⅾタイルマップでステージを作る
+
+１．画像の用意
+　正方形サイズの画像を用意し、Unityエディタのプロジェクトウィンドウにドラッグアンドドロップ
+　インスペクターウィンドウで以下の設定を行う
+　Texture Type → Sprite
+　Pixels Per Unit → 画像のピクセルサイズ
+
+２．タイルパレットの作成
+　Window → 2D → TilePalette
+　Create New Palette → Create
+
+３．タイルマップの作成
+　ヒエラルキーウィンドウ右クリック → 2DObject → Tilemap → Rectangular
+　
+４．当たり判定をつける
+　ヒエラルキーウィンドウ → Gridの子オブジェクトになってる「Tilemap」を選択
+　AddComponent → Tilemap Collider 2Dを追加
+
+５．プレーヤーの追加
+　ヒエラルキーウィンドウ右クリック → 2DObject → Sprites → Square
+　コンポーネントの追加と設定
+　Rigidbody 2D（Constraints - Freeze Rotation Zにチェックを入れる）
+　Box Collider 2D
+
+６．プレーヤースクリプトの作成
+　※ ジャンプのアクションがあるので、移動にRigidbody2D.velocityの値を利用する
+
+　※ 更新処理メソッドの使い分け例
+
+　　 Updateメソッド（毎フレーム呼ばれる）
+　　 ・キー入力
+　　 ・アニメーション
+　　 ・コライダー判定
+　　 
+　　 FixedUpdateメソッド（設定されている一定秒数（0.02）ごとによばれる）
+　　 ・Rigidbodyなど、物理演算を伴う値の変更処理
+
+　　 ※ 個人的には全部Updateメソッドでいい気もするが利用例としてFixedUpdateを紹介する
+　　 
+　※ [SerializeField]と public の使い分け
+　　 どちらもUnityエディタのインスペクタで値を変更できるが以下の違いがある
+　　 public・・・・・・他のクラスからも値を参照、変更できてしまう
+　　 [SerializeField]・他のクラスからは参照できない　　 
+　　 ※ 一般的に[SerializeField]を使った方が、プログラムの安全性は高まる
+　　 
+　※ Rigidbody2D.AddForceメソッドの第２引数
+　　 ForceMode2D.Force・・・毎フレーム継続的に作用することを前提に設定
+　　 ForceMode2D.Impulse・・1フレーム一瞬だけ作用することを前提に設定
+
+７．PlayerController.csの完成コード
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+    Rigidbody2D rb2d;           // リジッドボディ２Ⅾコンポーネント保存用
+
+    float inputLR;              // 左右入力
+    bool inputJump;             // ジャンプ入力
+
+    [SerializeField] float moveSpdX = 300;  // 移動速度x
+    [SerializeField] float jumpPower = 30; // ジャンプ力
+
+    void Start()
+    {
+        rb2d = GetComponent<Rigidbody2D>();
+    }
+
+    // 物理挙動（Rigidbody）の変更はFixedUpdateで
+    void FixedUpdate()
+    {
+        // 左右移動
+        {
+            // 左右入力に合わせて速度ベクトルをセット
+            Vector2 vel = rb2d.velocity;
+            vel.x = inputLR * moveSpdX * Time.deltaTime;
+            rb2d.velocity = vel;
+        }
+
+        // ジャンプ
+        if (inputJump == true)
+        {
+            Vector2 vel = rb2d.velocity;
+            vel.y = 0;              // まずYの速度を初期化
+            rb2d.velocity = vel;    // Yの速度反映
+            // ジャンプ力を加える
+            rb2d.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            inputJump = false;       // ジャンプフラグをオフに
+        }
+    }
+
+    // キー入力、アニメーション、コライダー判定はUpdateメソッドで
+    void Update()
+    {
+        // 左右移動
+        inputLR = Input.GetAxisRaw("Horizontal");
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            inputJump = true;               // ジャンプ入力オン
+        }
+    }
+}
