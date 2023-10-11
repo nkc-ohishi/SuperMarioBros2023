@@ -454,6 +454,8 @@ GameObject:
   - component: {fileID: 708597652}
   - component: {fileID: 708597655}
   - component: {fileID: 708597656}
+  - component: {fileID: 708597657}
+  - component: {fileID: 708597658}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -477,7 +479,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 10
-  m_Material: {fileID: 6200000, guid: 8d2b77fcb272c15419fd290c12708b9a, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -562,7 +564,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 708597650}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2fe31f6c6cf31f444a5a872332dca609, type: 3}
   m_Name: 
@@ -570,7 +572,8 @@ MonoBehaviour:
   lMask:
     serializedVersion: 2
     m_Bits: 8
-  moveSpdX: 300
+  MaxSpeed: 10
+  moveSpdX: 800
   jumpPower: 30
 --- !u!61 &708597656
 BoxCollider2D:
@@ -581,7 +584,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 708597650}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 8d2b77fcb272c15419fd290c12708b9a, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -617,6 +620,37 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &708597657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 708597650}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e1f32ad60047ff49874a29716751f47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpdX: 300
+  jumpPower: 30
+--- !u!114 &708597658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 708597650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13c5a01ab4e2f344beaf5f308d1cd11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpdX: 300
+  jumpPower: 30
+  lMask:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!1 &1486587208
 GameObject:
   m_ObjectHideFlags: 0

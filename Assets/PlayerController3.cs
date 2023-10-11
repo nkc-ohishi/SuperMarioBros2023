@@ -2,25 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController3 : MonoBehaviour
 {
-    public LayerMask lMask;     // レイヤーマスク
     Rigidbody2D rb2d;           // リジッドボディ２Ⅾコンポーネント保存用
-    BoxCollider2D col;          // ボックスコライダー
 
     float inputLR;              // 左右入力
-
     bool inputJump;             // ジャンプ入力
-    bool isGround;              // 地面にいるかのフラグ
 
-    [SerializeField] float MaxSpeed = 10;  // 移動最高速度x
-    [SerializeField] float moveSpdX = 100;  // 移動速度x
-    [SerializeField] float jumpPower = 300; // ジャンプ力
+    [SerializeField] float moveSpdX = 300;  // 移動速度x
+    [SerializeField] float jumpPower = 30; // ジャンプ力
+
+    // 着地判定用変数
+    BoxCollider2D col;          // ボックスコライダー
+    bool isGround;              // 地面にいるかのフラグ
+    public LayerMask lMask;     // レイヤーマスク
 
     void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
-        col  = GetComponent<BoxCollider2D>();
+        col = GetComponent<BoxCollider2D>();
     }
 
     // 物理挙動（Rigidbody）の変更はFixedUpdateで
@@ -30,14 +30,8 @@ public class PlayerController : MonoBehaviour
         {
             // 左右入力に合わせて速度ベクトルをセット
             Vector2 vel = rb2d.velocity;
-            // vel.x = inputLR * moveSpdX * Time.deltaTime;
-            float speed = inputLR * moveSpdX * Time.deltaTime;
-            rb2d.AddForce(new Vector2(speed, 0));
-            if(Mathf.Abs(rb2d.velocity.x) > MaxSpeed)
-            {
-                vel.x = MaxSpeed * inputLR;
-                rb2d.velocity = vel;
-            }
+            vel.x = inputLR * moveSpdX * Time.deltaTime;
+            rb2d.velocity = vel;
         }
 
         // ジャンプ
@@ -65,7 +59,7 @@ public class PlayerController : MonoBehaviour
         if (isGround == true)
         {
             if (Input.GetButtonDown("Jump"))
-            { // スペースキー
+            {
                 inputJump = true;               // ジャンプ入力オン
             }
         }
@@ -75,7 +69,6 @@ public class PlayerController : MonoBehaviour
     Vector3 GetCenterPos()
     {
         Vector3 pos = transform.position;
-        pos.y += col.offset.y;
         return pos;
     }
 
@@ -95,14 +88,14 @@ public class PlayerController : MonoBehaviour
         float width = col.size.x / 2;               // 幅を取得
         foot.x -= width;                            // 左端からチェック       
         for (int no = 0; no < 3; ++no)
-        {            // ３点チェック                    
+        {   // ３点チェック                    
             Vector3 end = foot + Vector3.down;      // レイの長さ    
             // ラインキャストを用いた地面チェック
             RaycastHit2D result;
             result = Physics2D.Linecast(foot, end, lMask);
             Debug.DrawLine(foot, end, Color.red);   // デバッグ表示
             if (result.collider != null)
-            {           // 何かに接触した
+            {   // 何かに接触した
                 isGround = true;
                 Debug.Log("地面に接触");
                 return;
